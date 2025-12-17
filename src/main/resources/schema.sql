@@ -14,4 +14,4 @@ CREATE TABLE ingredient(
     category category not null,
     id_dish int,
     constraint dish_fk foreign key (id_dish) references dish(id)
-)
+);
