@@ -10,7 +10,7 @@ public class Ingredient {
     public Ingredient() {
     }
 
-    public Ingredient(CategoryEnum category, Dish dish, int id, String name, Double price) {
+    public Ingredient( int id, String name, Double price,CategoryEnum category, Dish dish) {
         this.category = category;
         this.dish = dish;
         this.id = id;
@@ -62,12 +62,12 @@ public class Ingredient {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Ingredient that = (Ingredient) o;
-        return getId() == that.getId() && Objects.equals(getName(), that.getName()) && Objects.equals(getPrice(), that.getPrice()) && getCategory() == that.getCategory() && Objects.equals(getDish(), that.getDish());
+        return getId() == that.getId() && Objects.equals(getName(), that.getName()) && Objects.equals(getPrice(), that.getPrice()) && getCategory() == that.getCategory();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getPrice(), getCategory(), getDish());
+        return Objects.hash(getId(), getName(), getPrice(), getCategory());
     }
 
     @Override
@@ -77,7 +77,6 @@ public class Ingredient {
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
-                ", dish=" + dish +
                 '}';
     }
 }

@@ -53,12 +53,12 @@ public class Dish {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Dish dish = (Dish) o;
-        return getId() == dish.getId() && Objects.equals(getName(), dish.getName()) && getDishType() == dish.getDishType() && Objects.equals(getIngredients(), dish.getIngredients());
+        return getId() == dish.getId() && Objects.equals(getName(), dish.getName()) && getDishType() == dish.getDishType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getDishType(), getIngredients());
+        return Objects.hash(getId(), getName(), getDishType());
     }
 
     @Override
