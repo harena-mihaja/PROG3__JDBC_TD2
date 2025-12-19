@@ -18,6 +18,10 @@ public class Ingredient {
         this.price = price;
     }
 
+    public String getDishName(){
+        return dish == null ? null : dish.getName();
+    }
+
     public CategoryEnum getCategory() {
         return category;
     }
@@ -77,6 +81,7 @@ public class Ingredient {
                 ", id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
+                ", dishName=" + getDishName() +
                 '}';
     }
 }
