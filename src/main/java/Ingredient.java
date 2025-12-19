@@ -10,14 +10,6 @@ public class Ingredient {
     public Ingredient() {
     }
 
-    public Ingredient( int id, String name, Double price,CategoryEnum category, Dish dish) {
-        this.category = category;
-        this.dish = dish;
-        this.id = id;
-        this.name = name;
-        this.price = price;
-    }
-
     public String getDishName(){
         return dish == null ? null : dish.getName();
     }
@@ -77,10 +69,10 @@ public class Ingredient {
     @Override
     public String toString() {
         return "Ingredient{" +
-                "category=" + category +
-                ", id=" + id +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
+                ", category=" + category +
                 ", dishName=" + getDishName() +
                 '}';
     }

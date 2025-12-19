@@ -10,13 +10,6 @@ public class Dish {
     public Dish() {
     }
 
-    public Dish(DishTypeEnum dishType, int id, List<Ingredient> ingredients, String name) {
-        this.dishType = dishType;
-        this.id = id;
-        this.ingredients = ingredients;
-        this.name = name;
-    }
-
     public Double getDishCost(){
         return ingredients == null ? null :
                 ingredients.stream()
@@ -45,6 +38,9 @@ public class Dish {
     }
 
     public void setIngredients(List<Ingredient> ingredients) {
+        for (Ingredient ingredient : ingredients){
+            ingredient.setDish(this);
+        }
         this.ingredients = ingredients;
     }
 
@@ -71,9 +67,9 @@ public class Dish {
     @Override
     public String toString() {
         return "Dish{" +
-                "dishType=" + dishType +
-                ", id=" + id +
+                "id=" + id +
                 ", name='" + name + '\'' +
+                ", dishType=" + dishType +
                 ", ingredients=" + ingredients +
                 '}';
     }
