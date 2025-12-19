@@ -17,6 +17,13 @@ public class Dish {
         this.name = name;
     }
 
+    public Double getDishCost(){
+        return ingredients == null ? null :
+                ingredients.stream()
+                .mapToDouble(Ingredient::getPrice)
+                .sum();
+    }
+
     public DishTypeEnum getDishType() {
         return dishType;
     }
