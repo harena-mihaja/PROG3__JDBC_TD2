@@ -44,7 +44,31 @@ public class DataRetriever {
     }
 
     public List<Ingredient> findIngredients(int page, int size) {
-        throw new UnsupportedOperationException("Not implemented");
+        List<Ingredient> ingredientList = new ArrayList<>();
+        int offset = (page - 1) * size;
+        String sql = """
+                        SELECT i.id, i.name, i.price, i.category, d.id FROM ingredient i
+                        LEFT JOIN dish d ON d.id = i.id_dish
+                        LIMIT ? OFFSET ?
+                     """;
+        try (Connection conn = dbConnection.getDBConnection()){
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, size);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                Ingredient ingredient = new Ingredient();
+                ingredient.setId(rs.getInt(1));
+                ingredient.setName(rs.getString(2));
+                ingredient.setPrice(rs.getDouble(3));
+                ingredient.setCategory(CategoryEnum.valueOf(rs.getString(4)));
+                ingredient.setDish(findDishById(rs.getInt(5)));
+                ingredientList.add(ingredient);
+            }
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+        return  ingredientList;
     }
 
     public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
