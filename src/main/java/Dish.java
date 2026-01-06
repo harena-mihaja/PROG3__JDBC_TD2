@@ -10,6 +10,19 @@ public class Dish {
     public Dish() {
     }
 
+    public Dish(String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
+        this.name = name;
+        this.dishType = dishType;
+        this.ingredients = ingredients;
+    }
+
+    public Dish(int id, String name, DishTypeEnum dishType, List<Ingredient> ingredients) {
+        this.id = id;
+        this.name = name;
+        this.dishType = dishType;
+        this.ingredients = ingredients;
+    }
+
     public Double getDishCost() {
         return ingredients == null ? null :
                 ingredients.stream()

@@ -10,7 +10,14 @@ public class Ingredient {
     public Ingredient() {
     }
 
-    public Ingredient(String name, CategoryEnum category, Double price) {
+    public Ingredient(int id, String name, Double price, CategoryEnum category) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.category = category;
+    }
+
+    public Ingredient(String name, Double price, CategoryEnum category) {
         this.category = category;
         this.name = name;
         this.price = price;
