@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBConnection {
@@ -13,11 +14,15 @@ public class DBConnection {
 
         return DriverManager.getConnection(dbURL, dbUsername, dbPassword);
     }
-    public void closeConnection (Connection connection){
-        try{
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public void closeConnection (AutoCloseable... ressources){
+        for (AutoCloseable ressource : ressources){
+            if (ressource != null){
+                try{
+                    ressource.close();
+                }catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 }
