@@ -1,8 +1,6 @@
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class DataRetriever {
@@ -23,7 +21,7 @@ public class DataRetriever {
                 dish.setId(rs1.getInt(1));
                 dish.setName(rs1.getString(2));
                 dish.setDishType(DishTypeEnum.valueOf(rs1.getString(3)));
-            }else{
+            } else {
                 throw new RuntimeException("Dish with id: " + id + ", not found");
             }
             ResultSet rs2 = ps2.executeQuery();
@@ -47,16 +45,16 @@ public class DataRetriever {
         List<Ingredient> ingredientList = new ArrayList<>();
         int offset = (page - 1) * size;
         String sql = """
-                        SELECT i.id, i.name, i.price, i.category, d.id FROM ingredient i
-                        LEFT JOIN dish d ON d.id = i.id_dish
-                        LIMIT ? OFFSET ?
-                     """;
-        try (Connection conn = dbConnection.getDBConnection()){
+                   SELECT i.id, i.name, i.price, i.category, d.id FROM ingredient i
+                   LEFT JOIN dish d ON d.id = i.id_dish
+                   LIMIT ? OFFSET ?
+                """;
+        try (Connection conn = dbConnection.getDBConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, size);
             ps.setInt(2, offset);
             ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(rs.getInt(1));
                 ingredient.setName(rs.getString(2));
@@ -65,14 +63,67 @@ public class DataRetriever {
                 ingredient.setDish(findDishById(rs.getInt(5)));
                 ingredientList.add(ingredient);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return  ingredientList;
+        return ingredientList;
+    }
+
+    private List<String> findAllIngredientsName() {
+        List<String> ingredientsName = new ArrayList<>();
+        String sql = """
+                SELECT name FROM ingredient;
+                """;
+        try {
+            Connection conn = dbConnection.getDBConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ingredientsName.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ingredientsName;
     }
 
     public List<Ingredient> createIngredients(List<Ingredient> newIngredients) {
-        throw new UnsupportedOperationException("Not implemented");
+        List<Ingredient> createdIngredients = new ArrayList<>();
+        List<Ingredient> singleIngredientsList = new HashSet<>(newIngredients).stream().toList();
+        List<String> storedIngredients = findAllIngredientsName();
+        String sql =
+                """
+                        INSERT INTO ingredient(name, price, category, id_dish) VALUES (? ,?, ?::category,?)
+                        """;
+
+        try (Connection conn = dbConnection.getDBConnection()) {
+            conn.setAutoCommit(false);
+            for (Ingredient ingredient : singleIngredientsList) {
+                if (storedIngredients.contains(ingredient.getName())) {
+                    conn.rollback();
+                    throw new RuntimeException("The ingredient named \"" + ingredient.getName() + "\" already exists. No other ingredients have been added.");
+                }
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, ingredient.getName());
+                ps.setDouble(2, ingredient.getPrice());
+                ps.setString(3, ingredient.getCategory().name());
+                if (ingredient.getDish() != null) {
+                    ps.setInt(4, ingredient.getDish().getId());
+                } else {
+                    ps.setNull(4, ingredient.getId());
+                }
+                int i = ps.executeUpdate();
+                if (i > 0) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) ingredient.setId(rs.getInt(1));
+                }
+                createdIngredients.add(ingredient);
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return createdIngredients;
     }
 
     public Dish saveDish(Dish dishToSave) {
