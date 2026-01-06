@@ -1,3 +1,9 @@
+import model.CategoryEnum;
+import model.Dish;
+import model.DishTypeEnum;
+import model.Ingredient;
+import repository.DataRetriever;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         DataRetriever dao = new DataRetriever();
         System.out.println("--- findDishByID() ---");
-        System.out.println(dao.findDishById(1).getDishCost());
+        System.out.println(dao.findDishById(1));
         System.out.println(dao.findDishById(999));
         System.out.println("--- findIngredients() ---");
         System.out.println(dao.findIngredients(2, 2));

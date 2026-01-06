@@ -1,3 +1,11 @@
+package repository;
+
+import model.CategoryEnum;
+import model.Dish;
+import model.DishTypeEnum;
+import model.Ingredient;
+import db.DBConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +36,7 @@ public class DataRetriever {
                 dish.setName(rs1.getString(2));
                 dish.setDishType(DishTypeEnum.valueOf(rs1.getString(3)));
             } else {
-                throw new RuntimeException("Dish with id: " + id + " not found");
+                throw new RuntimeException("model.Dish with id: " + id + " not found");
             }
             rs2 = ps2.executeQuery();
             while (rs2.next()) {
