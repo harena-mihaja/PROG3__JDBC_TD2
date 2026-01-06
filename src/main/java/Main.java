@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -22,7 +21,7 @@ public class Main {
 //
 //        System.out.println(dao.createIngredients(ingredientList1));
 //        System.out.println(dao.createIngredients(ingredientList2));
-        System.out.println("--- saveDish() ---");
+//        System.out.println("--- saveDish() ---");
         Ingredient fromageWithId = new Ingredient(6, "Fromage", 1200D, CategoryEnum.DAIRY );
         Ingredient oignonWithId = new Ingredient(7, "Oignon", 500D, CategoryEnum.VEGETABLE);
         Ingredient laitueWithId = new Ingredient(1,"Laitue", 800D, CategoryEnum.VEGETABLE );
@@ -33,6 +32,8 @@ public class Main {
         Dish saladeFraiche = new Dish(1, "Salade fraiche", DishTypeEnum.START, new ArrayList<>(List.of(oignonWithId, laitueWithId, fromageWithId, tomateWithId)));
 //        System.out.println(dao.saveDish(saladeFraiche));
         Dish saladeFromage = new Dish(1, "Salade fraiche", DishTypeEnum.START, new ArrayList<>(List.of( fromageWithId)));
-        System.out.println(dao.saveDish(saladeFromage));
+//        System.out.println(dao.saveDish(saladeFromage));
+        System.out.println("---findDishsByIngredientName()---");
+        System.out.println(dao.findDishesByIngredientName("a"));
     }
 }

@@ -12,13 +12,17 @@ public class DataRetriever {
         Dish dish = new Dish();
         List<Ingredient> ingredients = new ArrayList<>();
         Connection conn = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+        ResultSet rs1 = null;
+        ResultSet rs2 = null;
         try {
             conn = dbConnection.getDBConnection();
-            PreparedStatement ps1 = conn.prepareStatement(dishQuery);
-            PreparedStatement ps2 = conn.prepareStatement(ingredientsQuery);
+            ps1 = conn.prepareStatement(dishQuery);
+            ps2 = conn.prepareStatement(ingredientsQuery);
             ps1.setInt(1, id);
             ps2.setInt(1, id);
-            ResultSet rs1 = ps1.executeQuery();
+            rs1 = ps1.executeQuery();
             if (rs1.next()) {
                 dish.setId(rs1.getInt(1));
                 dish.setName(rs1.getString(2));
@@ -26,7 +30,7 @@ public class DataRetriever {
             } else {
                 throw new RuntimeException("Dish with id: " + id + " not found");
             }
-            ResultSet rs2 = ps2.executeQuery();
+            rs2 = ps2.executeQuery();
             while (rs2.next()) {
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(rs2.getInt(1));
@@ -40,7 +44,7 @@ public class DataRetriever {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) dbConnection.closeConnection(conn);
+            if (conn != null) dbConnection.closeConnection(rs1, rs2, ps1, ps2, conn);
         }
         return dish;
     }
@@ -54,12 +58,14 @@ public class DataRetriever {
                    LIMIT ? OFFSET ?
                 """;
         Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = dbConnection.getDBConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, size);
             ps.setInt(2, offset);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(rs.getInt(1));
@@ -72,7 +78,7 @@ public class DataRetriever {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) dbConnection.closeConnection(conn);
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
         }
         return ingredientList;
     }
@@ -83,17 +89,19 @@ public class DataRetriever {
                 SELECT name FROM ingredient;
                 """;
         Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = dbConnection.getDBConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
             while (rs.next()) {
                 ingredientsName.add(rs.getString(1));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) dbConnection.closeConnection(conn);
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
         }
         return ingredientsName;
     }
@@ -107,6 +115,8 @@ public class DataRetriever {
                         INSERT INTO ingredient(name, price, category, id_dish) VALUES (? ,?, ?::category,?)
                         """;
         Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = dbConnection.getDBConnection();
             conn.setAutoCommit(false);
@@ -115,7 +125,7 @@ public class DataRetriever {
                     conn.rollback();
                     throw new RuntimeException("The ingredient named \"" + ingredient.getName() + "\" already exists. No other ingredients have been added.");
                 }
-                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, ingredient.getName());
                 ps.setDouble(2, ingredient.getPrice());
                 ps.setString(3, ingredient.getCategory().name());
@@ -126,7 +136,7 @@ public class DataRetriever {
                 }
                 int i = ps.executeUpdate();
                 if (i > 0) {
-                    ResultSet rs = ps.getGeneratedKeys();
+                    rs = ps.getGeneratedKeys();
                     if (rs.next()) ingredient.setId(rs.getInt(1));
                 }
                 createdIngredients.add(ingredient);
@@ -135,7 +145,7 @@ public class DataRetriever {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) dbConnection.closeConnection(conn);
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
         }
         return createdIngredients;
     }
@@ -146,11 +156,13 @@ public class DataRetriever {
                 SELECT id, name, price, category, id_dish FROM ingredient i WHERE id_dish = ?
                 """;
         Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = dbConnection.getDBConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, dishId);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(rs.getInt(1));
@@ -163,7 +175,7 @@ public class DataRetriever {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) dbConnection.closeConnection(conn);
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
         }
         return ingredientList;
     }
@@ -280,7 +292,27 @@ public class DataRetriever {
     }
 
     public List<Dish> findDishesByIngredientName(String IngredientName) {
-        throw new UnsupportedOperationException("Not implemented");
+        List<Dish> dishes = new ArrayList<>();
+        String sql = """
+                SELECT d.id FROM dish d JOIN ingredient i ON d.id = i.id_dish WHERE i.name ILIKE ?;
+                """;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = dbConnection.getDBConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, "%" + IngredientName + "%");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                dishes.add(findDishById(rs.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
+        }
+        return dishes;
     }
 
     public List<Ingredient> findIngredientsByCriteria(String ingredientName, CategoryEnum category, String dishName, int page, int size) {
