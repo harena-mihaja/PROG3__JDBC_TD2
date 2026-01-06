@@ -13,4 +13,11 @@ public class DBConnection {
 
         return DriverManager.getConnection(dbURL, dbUsername, dbPassword);
     }
+    public void closeConnection (Connection connection){
+        try{
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
