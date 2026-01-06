@@ -150,36 +150,6 @@ public class DataRetriever {
         return createdIngredients;
     }
 
-    public List<Ingredient> findIngredientsByDishId(int dishId) {
-        List<Ingredient> ingredientList = new ArrayList<>();
-        String sql = """
-                SELECT id, name, price, category, id_dish FROM ingredient i WHERE id_dish = ?
-                """;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = dbConnection.getDBConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, dishId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                Ingredient ingredient = new Ingredient();
-                ingredient.setId(rs.getInt(1));
-                ingredient.setName(rs.getString(2));
-                ingredient.setPrice(rs.getDouble(3));
-                ingredient.setCategory(CategoryEnum.valueOf(rs.getString(4)));
-                ingredient.setDish(findDishById(dishId));
-                ingredientList.add(ingredient);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
-        }
-        return ingredientList;
-    }
-
     public Dish saveDish(Dish dishToSave) {
         String insertDishSql =
                 """
