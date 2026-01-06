@@ -316,6 +316,53 @@ public class DataRetriever {
     }
 
     public List<Ingredient> findIngredientsByCriteria(String ingredientName, CategoryEnum category, String dishName, int page, int size) {
-        throw new UnsupportedOperationException("Not implemented");
+        List<Ingredient> ingredientList = new ArrayList<>();
+        StringBuilder baseSql = new StringBuilder("SELECT i.id, i.name, i.price, i.category, i.id_dish, d.name FROM ingredient i LEFT JOIN dish d ON i.id_dish = d.id WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+        if (ingredientName != null) {
+            baseSql.append(" AND i.name ILIKE ?");
+            parameters.add("%" + ingredientName + "%");
+        }
+        if (category != null) {
+            baseSql.append(" AND i.category = ?::category");
+            parameters.add(category.name());
+        }
+        if (dishName != null) {
+            baseSql.append(" AND d.name ILIKE ?");
+            parameters.add("%" + dishName + "%");
+        }
+        baseSql.append(" LIMIT ? OFFSET ?");
+        parameters.add(size);
+        int offset = (page - 1) * size;
+        parameters.add(offset);
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String finalSql = baseSql.toString();
+            conn = dbConnection.getDBConnection();
+            ps = conn.prepareStatement(finalSql);
+            for (int i = 0; i < parameters.size(); i++) {
+                ps.setObject(i + 1, parameters.get(i));
+            }
+            System.out.println(ps);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Ingredient ingredient = new Ingredient();
+                ingredient.setId(rs.getInt(1));
+                ingredient.setName(rs.getString(2));
+                ingredient.setPrice(rs.getDouble(3));
+                ingredient.setCategory(CategoryEnum.valueOf(rs.getString(4)));
+                if (rs.getInt(5) != 0) {
+                    ingredient.setDish(findDishById(rs.getInt(5)));
+                }
+                ingredientList.add(ingredient);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(rs, ps, conn);
+        }
+        return ingredientList;
     }
 }
