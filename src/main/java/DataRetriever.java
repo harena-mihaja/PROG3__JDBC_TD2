@@ -11,7 +11,9 @@ public class DataRetriever {
         String ingredientsQuery = "SELECT id, name, price, category FROM ingredient i WHERE id_dish = ?;";
         Dish dish = new Dish();
         List<Ingredient> ingredients = new ArrayList<>();
-        try (Connection conn = dbConnection.getDBConnection()) {
+        Connection conn = null;
+        try {
+            conn = dbConnection.getDBConnection();
             PreparedStatement ps1 = conn.prepareStatement(dishQuery);
             PreparedStatement ps2 = conn.prepareStatement(ingredientsQuery);
             ps1.setInt(1, id);
@@ -37,6 +39,8 @@ public class DataRetriever {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(conn);
         }
         return dish;
     }
@@ -49,7 +53,9 @@ public class DataRetriever {
                    LEFT JOIN dish d ON d.id = i.id_dish
                    LIMIT ? OFFSET ?
                 """;
-        try (Connection conn = dbConnection.getDBConnection()) {
+        Connection conn = null;
+        try {
+            conn = dbConnection.getDBConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, size);
             ps.setInt(2, offset);
@@ -65,6 +71,8 @@ public class DataRetriever {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(conn);
         }
         return ingredientList;
     }
@@ -74,8 +82,9 @@ public class DataRetriever {
         String sql = """
                 SELECT name FROM ingredient;
                 """;
+        Connection conn = null;
         try {
-            Connection conn = dbConnection.getDBConnection();
+            conn = dbConnection.getDBConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -83,6 +92,8 @@ public class DataRetriever {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(conn);
         }
         return ingredientsName;
     }
@@ -95,8 +106,9 @@ public class DataRetriever {
                 """
                         INSERT INTO ingredient(name, price, category, id_dish) VALUES (? ,?, ?::category,?)
                         """;
-
-        try (Connection conn = dbConnection.getDBConnection()) {
+        Connection conn = null;
+        try {
+            conn = dbConnection.getDBConnection();
             conn.setAutoCommit(false);
             for (Ingredient ingredient : singleIngredientsList) {
                 if (storedIngredients.contains(ingredient.getName())) {
@@ -122,6 +134,8 @@ public class DataRetriever {
             conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (conn != null) dbConnection.closeConnection(conn);
         }
         return createdIngredients;
     }
