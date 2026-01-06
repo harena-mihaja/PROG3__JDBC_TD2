@@ -10,11 +10,11 @@ public class Dish {
     public Dish() {
     }
 
-    public Double getDishCost(){
+    public Double getDishCost() {
         return ingredients == null ? null :
                 ingredients.stream()
-                .mapToDouble(Ingredient::getPrice)
-                .sum();
+                        .mapToDouble(Ingredient::getPrice)
+                        .sum();
     }
 
     public DishTypeEnum getDishType() {
@@ -38,7 +38,7 @@ public class Dish {
     }
 
     public void setIngredients(List<Ingredient> ingredients) {
-        for (Ingredient ingredient : ingredients){
+        for (Ingredient ingredient : ingredients) {
             ingredient.setDish(this);
         }
         this.ingredients = ingredients;

@@ -10,7 +10,13 @@ public class Ingredient {
     public Ingredient() {
     }
 
-    public String getDishName(){
+    public Ingredient(String name, CategoryEnum category, Double price) {
+        this.category = category;
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getDishName() {
         return dish == null ? null : dish.getName();
     }
 
